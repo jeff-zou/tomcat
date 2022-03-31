@@ -1183,6 +1183,7 @@ public abstract class AbstractEndpoint<S,U> {
             } else {
                 sc.reset(socketWrapper, event);
             }
+            //获得工作线程池，处理业务
             Executor executor = getExecutor();
             if (dispatch && executor != null) {
                 executor.execute(sc);

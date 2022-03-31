@@ -16,6 +16,7 @@
  */
 package org.apache.tomcat.util.net;
 
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -146,6 +147,10 @@ public class Acceptor<U> implements Runnable {
                     if (!stopCalled && !endpoint.isPaused()) {
                         // setSocketOptions() will hand the socket off to
                         // an appropriate processor if successful
+                        /**
+                         * 监听连接，并交由poller处理
+                         * {@link NioEndpoint#setSocketOptions(SocketChannel)} }
+                         */
                         if (!endpoint.setSocketOptions(socket)) {
                             endpoint.closeSocket(socket);
                         }

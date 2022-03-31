@@ -719,6 +719,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel, SocketChannel>
             boolean result = false;
 
             PollerEvent pe = null;
+            //poll从队列中获取
             for (int i = 0, size = events.size(); i < size && (pe = events.poll()) != null; i++) {
                 result = true;
                 NioSocketWrapper socketWrapper = pe.getSocketWrapper();
@@ -729,6 +730,8 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel, SocketChannel>
                     socketWrapper.close();
                 } else if (interestOps == OP_REGISTER) {
                     try {
+                        //注册事件，向select注册read监听事件，后续会读取channel内数据
+                        //即让poller的select来读取数据
                         sc.register(getSelector(), SelectionKey.OP_READ, socketWrapper);
                     } catch (Exception x) {
                         log.error(sm.getString("endpoint.nio.registerFail"), x);
@@ -829,6 +832,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel, SocketChannel>
 
                 try {
                     if (!close) {
+                        //检查是否有事件
                         hasEvents = events();
                         if (wakeupCounter.getAndSet(-1) > 0) {
                             // If we are here, means we have other stuff to do
@@ -870,6 +874,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel, SocketChannel>
                     // Attachment may be null if another thread has called
                     // cancelledKey()
                     if (socketWrapper != null) {
+                        //处理事件
                         processKey(sk, socketWrapper);
                     }
                 }
@@ -881,6 +886,11 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel, SocketChannel>
             getStopLatch().countDown();
         }
 
+        /**
+         * 处理读事件，读取数据
+         * @param sk
+         * @param socketWrapper
+         */
         protected void processKey(SelectionKey sk, NioSocketWrapper socketWrapper) {
             try {
                 if (close) {
@@ -903,7 +913,8 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel, SocketChannel>
                                         socketWrapper.readBlocking = false;
                                         socketWrapper.readLock.notify();
                                     }
-                                } else if (!processSocket(socketWrapper, SocketEvent.OPEN_READ, true)) {
+
+                                } else if (!processSocket(socketWrapper, SocketEvent.OPEN_READ, true)) { //读数据
                                     closeSocket = true;
                                 }
                             }
