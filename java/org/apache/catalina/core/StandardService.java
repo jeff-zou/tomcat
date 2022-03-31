@@ -446,6 +446,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             for (Connector connector: connectors) {
                 // If it has already failed, don't try and start it
                 if (connector.getState() != LifecycleState.FAILED) {
+                    //启动服务 {@link Connector#startInternal()}
                     connector.start();
                 }
             }

@@ -907,6 +907,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
 
 
     /**
+     * 启动服务
      * Start nested components ({@link Service}s) and implement the requirements
      * of {@link org.apache.catalina.util.LifecycleBase#startInternal()}.
      *
@@ -924,6 +925,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         // Start our defined Services
         synchronized (servicesLock) {
             for (Service service : services) {
+                //启动服务 {@link StandardService#startInternal()}
                 service.start();
             }
         }
